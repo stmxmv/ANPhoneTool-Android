@@ -15,6 +15,7 @@ buildscript {
 plugins {
     id 'com.android.application' version '7.4.2' apply false
     id 'com.android.library' version '7.4.2' apply false
+    id 'com.google.protobuf' version '0.9.3' apply false
 }
 
 allprojects {

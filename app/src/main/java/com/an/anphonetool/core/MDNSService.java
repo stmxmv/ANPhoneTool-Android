@@ -15,7 +15,7 @@ public class MDNSService implements ServiceListener {
 
     private JmDNS getJmDNS() throws IOException {
         if (jmdns == null) {
-            jmdns = JmDNS.create("ANPhoneTool");
+            jmdns = JmDNS.create();
         }
         return jmdns;
     }
@@ -38,6 +38,7 @@ public class MDNSService implements ServiceListener {
     @Override
     public void serviceRemoved(ServiceEvent event) {
         System.out.println("Service removed: " + event.getInfo());
+        _discoveryCallback.onServiceRemove(event);
     }
 
     @Override
