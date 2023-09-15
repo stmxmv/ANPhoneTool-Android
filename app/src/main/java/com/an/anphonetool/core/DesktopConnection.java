@@ -1,67 +1,231 @@
 package com.an.anphonetool.core;
 
-import androidx.annotation.NonNull;
-import com.an.anphonetool.DesktopMessageOuterClass;
-import com.google.protobuf.GeneratedMessageV3;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.net.Uri;
+import android.os.Environment;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
+
+import com.an.anphonetool.DesktopMessageOuterClass;
+import com.an.anphonetool.DeviceMessageOuterClass;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
-import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.UUID;
 
-public class DesktopConnection {
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+
+
+public class DesktopConnection implements DesktopControlHandlerDelegate {
 
     private static int CONTROL_PORT = 13131;
     private static int DATA_PORT = 13132;
 
-    private Socket controlSocket;
-    private Socket dataSocket;
-    private InputStream controlInputStream;
-    private OutputStream controlOutputStream;
+    private Inet4Address address;
+    private EventLoopGroup eventLoopGroup;
 
-    private InputStream dataInputStream;
-    private OutputStream dataOutputStream;
+    private DesktopControlHandler desktopControlHandler;
+    private DesktopDataHandler desktopDataHandler;
 
+    private DesktopConnectionDelegate delegate;
 
-    public DesktopConnection(Inet4Address address) throws IOException {
-        Socket controlSocket = new Socket(address, CONTROL_PORT);
-        Socket dataSocket = new Socket(address, DATA_PORT);
-        init(controlSocket, dataSocket);
+    private HashMap<UUID, String> sendFileMap = new HashMap<>();
+
+    public DesktopConnection(Inet4Address address) {
+        this.address = address;
+        desktopControlHandler = new DesktopControlHandler();
+        desktopDataHandler = new DesktopDataHandler();
+
+        desktopControlHandler.setDelegate(this);
+
+        desktopDataHandler.setControlHandler(desktopControlHandler);
     }
 
-    private DesktopConnection(@NonNull Socket controlSocket, @NonNull Socket dataSocket) throws IOException {
-        init(controlSocket, dataSocket);
+    public void start() {
+        eventLoopGroup = new NioEventLoopGroup();
+        desktopControlHandler
+                .connect(address, eventLoopGroup)
+                .addListener((@NonNull ChannelFuture future) -> {
+                    delegate.onConnect(true);
+        });
+        desktopDataHandler
+                .connect(address,  eventLoopGroup)
+                .addListener((@NonNull ChannelFuture future) -> {
+                    delegate.onConnect(true);
+                });
     }
 
-    private void init(@NonNull Socket controlSocket, @NonNull Socket dataSocket) throws IOException {
-        this.controlSocket = controlSocket;
-        this.dataSocket = dataSocket;
-        controlInputStream = controlSocket.getInputStream();
-        controlOutputStream = controlSocket.getOutputStream();
-
-        dataInputStream = dataSocket.getInputStream();
-        dataOutputStream = dataSocket.getOutputStream();
+    public void stop() {
+        desktopControlHandler.stop();;
+        desktopDataHandler.stop();
     }
 
-    public void close() throws IOException {
-        if (controlSocket != null) {
-            controlSocket.shutdownInput();
-            controlSocket.shutdownOutput();
-            controlSocket.close();
+    @Override
+    protected void finalize() throws Throwable {
+        stop();
+        super.finalize();
+    }
+
+    public DesktopConnectionDelegate getDelegate() {
+        return delegate;
+    }
+
+    public void setDelegate(DesktopConnectionDelegate delegate) {
+        this.delegate = delegate;
+    }
+
+    public void sendMessage(GeneratedMessageV3 message) {
+        SocketChannel channel = desktopControlHandler.getChannel();
+        if (channel != null) {
+            channel.writeAndFlush(message);
         }
     }
 
-    /// FIXME: not send data in ui thread!!
-    public void sendMessage(GeneratedMessageV3 message) throws IOException {
-        byte[] bytes = message.toByteArray();
-        int size = bytes.length + 4; // 4 is the int size
+    public void sendFile(Uri uri, Context context) {
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            AssetFileDescriptor fileDescriptor = resolver.openAssetFileDescriptor(uri, "r");
+            if (fileDescriptor == null) return;
 
-        controlOutputStream.write(Utility.intToBytes(size));
-        controlOutputStream.write(message.toByteArray());
+            long fileSize = fileDescriptor.getLength();
+
+            String fileName = Utility.getFileNameFromUri(resolver, uri);
+
+            InputStream inputStream = resolver.openInputStream(uri);
+
+            assert(inputStream != null);
+
+            if (fileName == null) {
+                DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
+                fileName = documentFile.getName();
+//                    fileName = documentFile.getUri().getPath();
+                if (fileName == null) {
+                    fileName = UUID.randomUUID().toString();
+                }
+            }
+
+            UUID fileUUID = UUID.randomUUID();
+
+            FileUtils fileUtils = new FileUtils(context);
+            String path = fileUtils.getPath(uri);
+
+            File file = new File(path);
+
+            if (!file.exists()) {
+
+                File copyFile = new File(context.getFilesDir().getPath() + File.separatorChar + fileName);
+                try (OutputStream os = Files.newOutputStream(copyFile.toPath())) {
+                    byte[] buffer = new byte[4096];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        os.write(buffer, 0, length);
+                    }
+                    os.flush();
+                } catch (Exception ex) {
+                    delegate.onError(ex);
+                }
+                path = copyFile.getPath();
+            }
+
+            sendFileMap.put(fileUUID, path);
+            Log.d("AN", "will send file with uuid " + fileUUID);
+
+            DesktopMessageOuterClass.SendFileInfo sendFileInfo =
+                    DesktopMessageOuterClass.SendFileInfo.newBuilder()
+                            .setUuid(ByteString.copyFrom(Utility.UUIDToBytes(fileUUID)))
+                            .setFileName(fileName)
+                            .setFileSize(fileSize)
+                            .build();
+
+            DesktopMessageOuterClass.DesktopMessage message =
+                    DesktopMessageOuterClass.DesktopMessage.newBuilder()
+                            .setType(DesktopMessageOuterClass.DesktopMessageType.kDesktopMessageSendFile)
+                            .setData(sendFileInfo.toByteString())
+                            .build();
+
+            sendMessage(message);
+
+        } catch (FileNotFoundException e) {
+            delegate.onError(e);
+        }
     }
 
+    @Override
+    public void onControlActive() {
 
+    }
+
+    @Override
+    public void onControlInActive() {
+        delegate.onConnect(false);
+    }
+
+    @Override
+    public void onControlReadMessage(DeviceMessageOuterClass.DeviceMessage message) {
+        switch (message.getType()) {
+            case kDeviceMessageNone:
+                break;
+            case kDeviceMessageAckSendFile:
+                try {
+                    DesktopMessageOuterClass.AckSendFileInfo ack = DesktopMessageOuterClass.AckSendFileInfo.parseFrom(message.getData());
+                    UUID uuid = Utility.bytesToUUID(ack.getUuid().toByteArray());
+                    Log.d("AN", "Desktop ack send file " + uuid + " pos " + ack.getPos());
+
+                    if (sendFileMap.containsKey(uuid)) {
+                        double percentage = desktopDataHandler.sendFile(ack, sendFileMap.get(uuid));
+                        delegate.onFileSendProgress(percentage, desktopDataHandler.getByteRate());
+                    } else {
+                        Log.d("AN", "SendFileMap not contain this uuid " + uuid);
+                    }
+
+                } catch (IOException e) {
+                    delegate.onError(e);
+                }
+                break;
+
+            case kDeviceMessageAckSendComplete:
+                try {
+                    DesktopMessageOuterClass.AckSendFileInfo ack = DesktopMessageOuterClass.AckSendFileInfo.parseFrom(message.getData());
+                    UUID uuid = Utility.bytesToUUID(ack.getUuid().toByteArray());
+
+                    delegate.onFileSendComplete();
+
+                } catch (InvalidProtocolBufferException e) {
+                    delegate.onError(e);
+                }
+                break;
+
+            case kDeviceMessageRing:
+                delegate.onRing();
+                break;
+
+            case kDeviceMessageSendFile:
+                try {
+                    DesktopMessageOuterClass.SendFileInfo info = DesktopMessageOuterClass.SendFileInfo.parseFrom(message.getData());
+                    desktopDataHandler.willReceiveFile(info);
+                } catch (InvalidProtocolBufferException e) {
+                    delegate.onError(e);
+                }
+                break;
+            case UNRECOGNIZED:
+                break;
+        }
+    }
 
 }

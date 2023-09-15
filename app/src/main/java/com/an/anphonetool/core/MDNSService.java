@@ -1,8 +1,15 @@
 package com.an.anphonetool.core;
 
+import android.net.wifi.WifiManager;
+import android.util.Log;
+
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -13,9 +20,34 @@ public class MDNSService implements ServiceListener {
     private JmDNS jmdns;
     private ServiceDiscoveryCallback _discoveryCallback;
 
+    /// to avoid loopback or something
+    public InetAddress getCurrentIp() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
+                    .getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = (NetworkInterface) networkInterfaces
+                        .nextElement();
+                Enumeration<InetAddress> nias = ni.getInetAddresses();
+                while(nias.hasMoreElements()) {
+                    InetAddress ia= (InetAddress) nias.nextElement();
+                    if (!ia.isLinkLocalAddress()
+                            && !ia.isLoopbackAddress()
+                            && ia instanceof Inet4Address) {
+                        return ia;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            Log.d("AN", "unable to get current IP " + e.getMessage(), e);
+        }
+        return null;
+    }
+
     private JmDNS getJmDNS() throws IOException {
         if (jmdns == null) {
-            jmdns = JmDNS.create();
+            jmdns = JmDNS.create(getCurrentIp());
+            Log.d("AN", "MDNS discovery at address " + jmdns.getInetAddress());
         }
         return jmdns;
     }
