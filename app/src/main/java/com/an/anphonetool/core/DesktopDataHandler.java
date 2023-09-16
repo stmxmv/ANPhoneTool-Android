@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -119,7 +120,7 @@ public class DesktopDataHandler extends ChannelInboundHandlerAdapter {
         this.controlHandler = controlHandler;
     }
 
-    public ChannelFuture connect(Inet4Address address, @Nullable EventLoopGroup group) {
+    public ChannelFuture connect(InetAddress address, @Nullable EventLoopGroup group) {
         if (group == null) {
             group = new NioEventLoopGroup();
         }

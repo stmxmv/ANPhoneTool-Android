@@ -1,81 +1,103 @@
 package com.an.anphonetool.core;
 
+import static android.content.Context.WIFI_SERVICE;
+
+import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.Enumeration;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 
-public class MDNSService implements ServiceListener {
-    private static String RegType = "_anphonetool._tcp.local.";
-    private JmDNS jmdns;
-    private ServiceDiscoveryCallback _discoveryCallback;
+import android.content.Context;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.util.Log;
 
-    /// to avoid loopback or something
-    public InetAddress getCurrentIp() {
-        try {
-            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
-                    .getNetworkInterfaces();
-            while (networkInterfaces.hasMoreElements()) {
-                NetworkInterface ni = (NetworkInterface) networkInterfaces
-                        .nextElement();
-                Enumeration<InetAddress> nias = ni.getInetAddresses();
-                while(nias.hasMoreElements()) {
-                    InetAddress ia= (InetAddress) nias.nextElement();
-                    if (!ia.isLinkLocalAddress()
-                            && !ia.isLoopbackAddress()
-                            && ia instanceof Inet4Address) {
-                        return ia;
-                    }
-                }
+public class MDNSService {
+
+    private NsdManager nsdManager;
+    private ServiceDiscoveryCallback discoveryCallback;
+
+    private final String serviceType = "_anphonetool._tcp.";
+
+    private NsdManager.DiscoveryListener discoveryListener;
+
+    public MDNSService(Context context) {
+        nsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+    }
+
+    public void startDiscovery(ServiceDiscoveryCallback callback) {
+        discoveryCallback = callback;
+
+        discoveryListener = new NsdManager.DiscoveryListener() {
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e("MDNSService", "Discovery failed: " + errorCode);
             }
-        } catch (SocketException e) {
-            Log.d("AN", "unable to get current IP " + e.getMessage(), e);
-        }
-        return null;
-    }
 
-    private JmDNS getJmDNS() throws IOException {
-        if (jmdns == null) {
-            jmdns = JmDNS.create(getCurrentIp());
-            Log.d("AN", "MDNS discovery at address " + jmdns.getInetAddress());
-        }
-        return jmdns;
-    }
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e("MDNSService", "Stop discovery failed: " + errorCode);
+            }
 
-    public void startDiscovery(ServiceDiscoveryCallback callback) throws IOException {
-        _discoveryCallback = callback;
-        getJmDNS().addServiceListener(RegType, this);
+            @Override
+            public void onDiscoveryStarted(String serviceType) {
+                Log.d("MDNSService", "Discovery started");
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.d("MDNSService", "Discovery stopped");
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo serviceInfo) {
+                Log.d("MDNSService", "Service found: " + serviceInfo);
+                nsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
+                    @Override
+                    public void onResolveFailed(NsdServiceInfo nsdServiceInfo, int i) {
+
+                    }
+
+                    @Override
+                    public void onServiceResolved(NsdServiceInfo nsdServiceInfo) {
+                        discoveryCallback.onServiceFound(nsdServiceInfo);
+                    }
+                });
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo serviceInfo) {
+                Log.d("MDNSService", "Service lost: " + serviceInfo);
+                discoveryCallback.onServiceRemove(serviceInfo);
+            }
+        };
+
+        nsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
     }
 
     public void stopDiscovery() {
-        if (jmdns == null) return;
-        jmdns.removeServiceListener(RegType, this);
+        if (nsdManager != null) {
+            nsdManager.stopServiceDiscovery(discoveryListener);
+        }
     }
 
-    @Override
-    public void serviceAdded(ServiceEvent event) {
-        System.out.println("Service added: " + event.getInfo());
-    }
-
-    @Override
-    public void serviceRemoved(ServiceEvent event) {
-        System.out.println("Service removed: " + event.getInfo());
-        _discoveryCallback.onServiceRemove(event);
-    }
-
-    @Override
-    public void serviceResolved(ServiceEvent event) {
-        System.out.println("Service resolved: " + event.getInfo());
-        _discoveryCallback.onServiceFound(event);
-    }
+//    public interface ServiceDiscoveryCallback {
+//        void onServiceFound(NsdServiceInfo serviceInfo);
+//        void onServiceLost(NsdServiceInfo serviceInfo);
+//    }
 }

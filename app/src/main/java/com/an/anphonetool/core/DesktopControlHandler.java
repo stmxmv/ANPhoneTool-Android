@@ -16,6 +16,7 @@ import com.google.protobuf.GeneratedMessageV3;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,7 +74,7 @@ public class DesktopControlHandler extends ChannelInboundHandlerAdapter {
         this.delegate = delegate;
     }
 
-    public ChannelFuture connect(Inet4Address address, @Nullable EventLoopGroup group) {
+    public ChannelFuture connect(InetAddress address, @Nullable EventLoopGroup group) {
         if (group == null) {
             group = new NioEventLoopGroup();
         }

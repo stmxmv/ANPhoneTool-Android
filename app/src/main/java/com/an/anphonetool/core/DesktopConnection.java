@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class DesktopConnection implements DesktopControlHandlerDelegate {
     private static int CONTROL_PORT = 13131;
     private static int DATA_PORT = 13132;
 
-    private Inet4Address address;
+    private InetAddress address;
     private EventLoopGroup eventLoopGroup;
 
     private DesktopControlHandler desktopControlHandler;
@@ -47,7 +48,7 @@ public class DesktopConnection implements DesktopControlHandlerDelegate {
 
     private HashMap<UUID, String> sendFileMap = new HashMap<>();
 
-    public DesktopConnection(Inet4Address address) {
+    public DesktopConnection(InetAddress address) {
         this.address = address;
         desktopControlHandler = new DesktopControlHandler();
         desktopDataHandler = new DesktopDataHandler();
