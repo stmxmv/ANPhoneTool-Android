@@ -23,7 +23,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.an.anphonetool.Ln;
-import com.an.anphonetool.mirror.CodecOption;
+//import com.an.anphonetool.mirror.CodecOption;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -53,24 +53,24 @@ public class MirrorHandler extends Service implements Runnable {
         this.delegate = delegate;
     }
 
-    private static void setCodecOption(MediaFormat format, CodecOption codecOption) {
-        String key = codecOption.getKey();
-        Object value = codecOption.getValue();
+    private static void setCodecOption(MediaFormat format) {
+//        String key = codecOption.getKey();
+//        Object value = codecOption.getValue();
 
-        if (value instanceof Integer) {
-            format.setInteger(key, (Integer) value);
-        } else if (value instanceof Long) {
-            format.setLong(key, (Long) value);
-        } else if (value instanceof Float) {
-            format.setFloat(key, (Float) value);
-        } else if (value instanceof String) {
-            format.setString(key, (String) value);
-        }
+//        if (value instanceof Integer) {
+//            format.setInteger(key, (Integer) value);
+//        } else if (value instanceof Long) {
+//            format.setLong(key, (Long) value);
+//        } else if (value instanceof Float) {
+//            format.setFloat(key, (Float) value);
+//        } else if (value instanceof String) {
+//            format.setString(key, (String) value);
+//        }
 
-        Ln.d("Codec option set: " + key + " (" + value.getClass().getSimpleName() + ") = " + value);
+//        Ln.d("Codec option set: " + key + " (" + value.getClass().getSimpleName() + ") = " + value);
     }
 
-    private MediaFormat createFormat(int bitRate, int maxFps, List<CodecOption> codecOptions) {
+    private MediaFormat createFormat(int bitRate, int maxFps) {
         MediaFormat format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, width, height);
 
 //        format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0);
@@ -92,11 +92,11 @@ public class MirrorHandler extends Service implements Runnable {
             format.setFloat(KEY_MAX_FPS_TO_ENCODER, maxFps);
         }
 
-        if (codecOptions != null) {
-            for (CodecOption option : codecOptions) {
-                setCodecOption(format, option);
-            }
-        }
+//        if (codecOptions != null) {
+//            for (CodecOption option : codecOptions) {
+//                setCodecOption(format, option);
+//            }
+//        }
 
         return format;
     }
@@ -136,7 +136,7 @@ public class MirrorHandler extends Service implements Runnable {
 
     @Override
     public void run() {
-        mediaFormat = createFormat(8000000, 0, null);
+        mediaFormat = createFormat(8000000, 0);
 
         try {
             mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);

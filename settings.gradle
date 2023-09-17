@@ -15,4 +15,4 @@ pluginManagement {
 
 rootProject.name = "ANPhoneTool"
 include ':app'
-include ':anphonedaemon'
+//include ':anphonedaemon'

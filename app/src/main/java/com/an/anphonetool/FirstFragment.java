@@ -38,7 +38,6 @@ import com.an.anphonetool.core.Utility;
 import com.an.anphonetool.databinding.FragmentFirstBinding;
 import com.an.anphonetool.service.MirrorHandler;
 import com.an.anphonetool.service.MirrorHandlerDelegate;
-import com.an.anphonetool.service.MirrorTask;
 import com.google.protobuf.ByteString;
 
 import java.io.FileDescriptor;
