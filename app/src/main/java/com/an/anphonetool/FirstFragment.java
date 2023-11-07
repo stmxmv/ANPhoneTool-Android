@@ -53,11 +53,6 @@ import java.util.List;
 import javax.jmdns.ServiceEvent;
 
 
-class ServiceInfo {
-    String name;
-    InetAddress addresses[];
-}
-
 public class FirstFragment extends Fragment
         implements ServiceDiscoveryCallback, DesktopConnectionDelegate, MirrorHandlerDelegate {
 

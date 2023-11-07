@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="#3E99F1"
+        android:gravity="center_horizontal|bottom"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="双端连接助手"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="当前版本：1.0.2"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+
+        android:gravity="center_horizontal"
+        android:background="#3E99F1"
+        android:padding="16dp">
+
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="50dp"
+            android:src="@drawable/phone2pc"
+            android:background="#ffffff"
+            android:layout_gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手机电脑已连接"
+            android:textStyle="bold"
+            android:layout_marginLeft="30dp"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/PPT"
+            android:layout_width="175dp"
+            android:layout_height="75dp"
+            android:background="#CECECE"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/file" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PPT"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PPT 控制"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical"
+                    />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sendText"
+            android:layout_width="175dp"
+            android:layout_height="75dp"
+            android:background="#CECECE"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/file" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发送文字"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发送文字到光标位置"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical"
+                    />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/sendFile"
+            android:layout_width="175dp"
+            android:layout_height="75dp"
+            android:background="#CECECE"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/file" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="传输文件"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发送/接收文件"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical"
+                    />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mirror_screen"
+            android:layout_width="175dp"
+            android:layout_height="75dp"
+            android:background="#CECECE"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:adjustViewBounds="true"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/file" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="屏幕镜像"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="投屏手机到电脑"
+                    android:textColor="@color/black"
+                    android:textSize="14sp"
+                    android:gravity="center_vertical"
+                    />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/disconnectButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="断开连接"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:background="#ff0000"
+        android:gravity="center" />
+
+</LinearLayout>

@@ -52,10 +52,23 @@ public class DesktopConnection implements DesktopControlHandlerDelegate {
         this.address = address;
         desktopControlHandler = new DesktopControlHandler();
         desktopDataHandler = new DesktopDataHandler();
-
         desktopControlHandler.setDelegate(this);
-
         desktopDataHandler.setControlHandler(desktopControlHandler);
+    }
+
+    public DesktopConnection() {
+        desktopControlHandler = new DesktopControlHandler();
+        desktopDataHandler = new DesktopDataHandler();
+        desktopControlHandler.setDelegate(this);
+        desktopDataHandler.setControlHandler(desktopControlHandler);
+    }
+
+    public void setAddress(InetAddress address) {
+        this.address = address;
+    }
+
+    public InetAddress getAddress() {
+        return this.address;
     }
 
     public void start() {
@@ -73,8 +86,20 @@ public class DesktopConnection implements DesktopControlHandlerDelegate {
     }
 
     public void stop() {
+        eventLoopGroup.shutdownGracefully();
         desktopControlHandler.stop();;
         desktopDataHandler.stop();
+
+        eventLoopGroup = null;
+        desktopControlHandler = null;
+        desktopDataHandler = null;
+    }
+
+    public void reset()  {
+        desktopControlHandler = new DesktopControlHandler();
+        desktopDataHandler = new DesktopDataHandler();
+        desktopControlHandler.setDelegate(this);
+        desktopDataHandler.setControlHandler(desktopControlHandler);
     }
 
     @Override

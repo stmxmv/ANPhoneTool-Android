@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.os.StrictMode;
 
+import com.an.anphonetool.core.DesktopConnection;
+
 public class ANApplication extends Application {
     private static Application sApplication;
     public static Application getApplication() {
@@ -13,6 +15,12 @@ public class ANApplication extends Application {
     public static Context getContext() {
         return getApplication().getApplicationContext();
     }
+
+    public static ANApplication getInstance() {
+        return (ANApplication) sApplication;
+    }
+
+    public DesktopConnection desktopConnection;
 
     @Override
     public void onCreate() {
@@ -24,5 +32,7 @@ public class ANApplication extends Application {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        desktopConnection = new DesktopConnection();
     }
 }

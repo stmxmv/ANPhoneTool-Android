@@ -3,26 +3,48 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/Login">
+
+    <fragment
+        android:id="@+id/Home"
+        android:name="com.an.anphonetool.HomeFrag"
+        tools:layout="@layout/home">
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/Login" />
+        <action
+            android:id="@+id/action_Home_to_SlideShow"
+            app:destination="@id/SlideShow" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/Login"
+        android:name="com.an.anphonetool.LoginFrag"
+        tools:layout="@layout/login">
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/Home" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SlideShow"
+        android:name="com.an.anphonetool.SlideShowFrag"
+        tools:layout="@layout/slideshow">
+
+        <action
+            android:id="@+id/action_SlideShow_to_Home"
+            app:destination="@id/Home" />
+
+        <action
+            android:id="@+id/action_SlideShow_to_Login"
+            app:destination="@id/Login" />
+    </fragment>
 
     <fragment
         android:id="@+id/FirstFragment"
         android:name="com.an.anphonetool.FirstFragment"
-        android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
-
-        <action
-            android:id="@+id/action_FirstFragment_to_SecondFragment"
-            app:destination="@id/SecondFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/SecondFragment"
-        android:name="com.an.anphonetool.SecondFragment"
-        android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_second">
 
-        <action
-            android:id="@+id/action_SecondFragment_to_FirstFragment"
-            app:destination="@id/FirstFragment" />
-    </fragment>
 </navigation>
